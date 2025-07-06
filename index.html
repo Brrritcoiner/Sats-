@@ -146,9 +146,9 @@
     const data = [];
 
     rows.forEach(row => {
-      const [date, price, sats] = row.split(',');
+      const [date, price, sats] = row.split('\t'); // Fixed: tab-separated
       labels.push(date);
-      data.push(parseInt(sats));
+      data.push(parseInt(sats.trim())); // Trim for good measure
     });
 
     const ctx = document.getElementById('satsChart').getContext('2d');
