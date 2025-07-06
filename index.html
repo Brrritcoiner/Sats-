@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Sats to the £</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
@@ -56,6 +56,25 @@
       width: 100%;
     }
 
+    .download-btn {
+      margin-top: 20px;
+      text-align: right;
+    }
+
+    .download-btn button {
+      background-color: #F7931A;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .download-btn button:hover {
+      background-color: #e67e00;
+    }
+
     .news-section {
       margin: 20px;
     }
@@ -64,25 +83,6 @@
       border: none;
       width: 100%;
       height: 600px;
-    }
-
-    button {
-      margin: 0 4px;
-      padding: 6px 12px;
-      border: none;
-      background-color: #F7931A;
-      color: white;
-      font-weight: bold;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #e67e00;
-    }
-
-    button.active {
-      background-color: #2c3e50;
     }
 
     @media (max-width: 768px) {
@@ -106,17 +106,13 @@
 
 <div class="chart-section">
   <div class="chart-container">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-      <h3 style="margin: 0;">Sats per £</h3>
-      <div id="range-buttons">
-        <button data-range="7">7d</button>
-        <button data-range="30">30d</button>
-        <button data-range="90">90d</button>
-        <button data-range="365">1y</button>
-        <button data-range="max">Max</button>
-      </div>
-    </div>
+    <h3 style="margin-bottom: 10px;">Sats per £ (Monthly)</h3>
     <canvas id="satsChart"></canvas>
+    <div class="download-btn">
+      <a href="btc_gbp_monthly_history.csv" download="sats_per_gbp_history.csv">
+        <button>⬇ Download CSV</button>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -126,62 +122,6 @@
 </div>
 
 <script>
-  let satsChart;
-
-  function setActiveButton(days) {
-    document.querySelectorAll('#range-buttons button').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.range === days);
-    });
-  }
-
-  async function updateChart(days = '30') {
-    localStorage.setItem('preferredChartDays', days);
-    setActiveButton(days);
-
-    const res = await fetch(`https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=gbp&days=${days}`);
-    const data = await res.json();
-
-    const labels = [];
-    const satsData = [];
-
-    data.prices.forEach(([timestamp, price]) => {
-      const date = new Date(timestamp);
-      const label = days === '1' ? date.toLocaleTimeString() : date.toLocaleDateString();
-      const sats = 100000000 / price;
-
-      labels.push(label);
-      satsData.push(sats.toFixed(0));
-    });
-
-    const ctx = document.getElementById('satsChart').getContext('2d');
-
-    if (satsChart) {
-      satsChart.destroy();
-    }
-
-    satsChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: `Sats per £ (${days}d)`,
-          data: satsData,
-          borderColor: '#F7931A',
-          backgroundColor: 'rgba(247,147,26,0.1)',
-          fill: true,
-          tension: 0.4
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: false
-          }
-        }
-      }
-    });
-  }
-
   async function updateLiveStats() {
     try {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp');
@@ -197,17 +137,53 @@
     }
   }
 
-  // Initial load
-  document.addEventListener('DOMContentLoaded', () => {
-    const preferred = localStorage.getItem('preferredChartDays') || '30';
-    updateChart(preferred);
-    updateLiveStats();
+  async function loadCSVChart() {
+    const res = await fetch('btc_gbp_monthly_history.csv');
+    const csv = await res.text();
 
-    document.querySelectorAll('#range-buttons button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        updateChart(btn.dataset.range);
-      });
+    const rows = csv.trim().split('\n').slice(1);
+    const labels = [];
+    const data = [];
+
+    rows.forEach(row => {
+      const [date, price, sats] = row.split(',');
+      labels.push(date);
+      data.push(parseInt(sats));
     });
+
+    const ctx = document.getElementById('satsChart').getContext('2d');
+    if (window.satsChart) window.satsChart.destroy();
+
+    window.satsChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Sats per £',
+          data,
+          borderColor: '#F7931A',
+          backgroundColor: 'rgba(247,147,26,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: {
+            beginAtZero: false,
+            ticks: {
+              callback: value => value.toLocaleString()
+            }
+          }
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateLiveStats();
+    loadCSVChart();
   });
 
   setInterval(updateLiveStats, 60000);
