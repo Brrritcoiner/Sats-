@@ -45,3 +45,111 @@
       padding: 10px;
       border: 1px solid white;
       text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .footer-links div {
+      margin: 10px;
+      font-weight: bold;
+    }
+    canvas {
+      background: white;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMwAAADACAMAAAB/Pny7AAAAkFBMVEX3kxr////3jgD3jAD3khX2iQD3kQ/2hwD2hQD//Pr/+vb2ggD3kAD3jwj+7uD96Nf+9Oz3lSL817r94s34pEz83cL81bT5tXb5rmT7zaX5r3D6wIv+8eb7yZ77zqr4pVX4nkP4nTn4ly/4plz6uoH7xZb2jBX6vo/3n073lTb6uof4qmj2kCT6wZr5s235sXhrGeCIAAAOr0lEQVR4nOVdaZOqOBTFJIRF2UQQNzalu1870+///7sBFTtognAT7a6aUzVfuuYhh9yb3N..." alt="Bitcoin Logo" width="40" />
+  </div>
+  <div>GBP/BTC PRICE: <span id="btcPrice">£...</span></div>
+  <div>£1 = <span id="satsValue">...</span> SATS</div>
+  <div>1 SAT = <span id="pencePerSat">...</span> PENCE</div>
+</header>
+
+<div class="section">
+  <h1>DIGITAL GOLD 2.0</h1>
+  <div class="divider"></div>
+
+  <h2>LIVE SATS/£ HISTORICAL CHART</h2>
+  <canvas id="satsChart" width="100%" height="400px"></canvas>
+
+  <div class="divider"></div>
+  <h2>What is Bitcoin?</h2>
+  <p>
+    Bitcoin is divisible to 8 decimal places — like a pound can be divided into 100 pence, one bitcoin can be divided into 100 million Satoshis (Sats for short), named after Bitcoin's anonymous creator Satoshi Nakamoto.
+  </p>
+
+  <div class="btc-breakdown">
+    <table>
+      <thead>
+        <tr><th>Bitcoin Amount</th><th>Sats</th><th>Live Price (£)</th></tr>
+      </thead>
+      <tbody id="btcTable">
+        <!-- Filled by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+  <p>
+    Just like gold is divisible to tonnes, kilos, ounces, grams and grains, bitcoin is also divisible, fungible, portable, durable, scarce, secure, transferable, transparent and acts as a decentralised monetary network with total transparency and auditability — way cool, my dude.
+  </p>
+
+  <p>
+    Just like my Dad's harder than your Dad, my money's harder than your money. Anything yours can do, mine can do ten times better while looking cool AF too.
+  </p>
+
+  <p>
+    Bitcoin is the honey badger of money. It's anti-fragile — it'll take your beating and return a mauling ten times worse, and then turn and look super cool again.
+  </p>
+
+  <h3>So... you don't have to buy a whole Bitcoin!!!</h3>
+
+  <div class="footer-links">
+    <div><a href="#">LINKS</a></div>
+    <div><a href="#">ARTICLES</a></div>
+    <div><a href="#">BITCOIN MEMES</a></div>
+    <div><a href="#">HISTORY</a></div>
+    <div><a href="#">NEWSFEED</a></div>
+    <div><a href="#">MEMEMORY</a></div>
+  </div>
+</div>
+
+<script>
+  async function updatePrices() {
+    try {
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp');
+      const data = await res.json();
+      const price = data.bitcoin.gbp;
+      const satsPerPound = Math.floor(100000000 / price);
+      const pencePerSat = (100 / satsPerPound).toFixed(6);
+
+      document.getElementById('btcPrice').textContent = `£${price.toLocaleString()}`;
+      document.getElementById('satsValue').textContent = satsPerPound.toLocaleString();
+      document.getElementById('pencePerSat').textContent = pencePerSat;
+
+      const btcLevels = [1, 0.5, 0.25, 0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001];
+      const tableBody = document.getElementById('btcTable');
+      tableBody.innerHTML = btcLevels.map(btc => {
+        const sats = btc * 100000000;
+        const gbp = (price * btc).toFixed(2);
+        return `<tr><td>${btc} BTC</td><td>${sats.toLocaleString()}</td><td>£${gbp}</td></tr>`;
+      }).join('');
+    } catch (e) {
+      console.error('Price update failed', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', updatePrices);
+  setInterval(updatePrices, 60000);
+</script>
+
+</body>
+</html>
