@@ -43,10 +43,8 @@
 
     .chart-section {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
+      justify-content: center;
       padding: 20px;
-      gap: 20px;
     }
 
     .chart-container {
@@ -54,7 +52,8 @@
       padding: 15px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
-      flex: 1 1 400px;
+      max-width: 800px;
+      width: 100%;
     }
 
     .news-section {
@@ -118,10 +117,6 @@
       </div>
     </div>
     <canvas id="satsChart"></canvas>
-  </div>
-  <div class="chart-container">
-    <h3>All-Time BTC Price (Log Scale)</h3>
-    <canvas id="btcLogChart"></canvas>
   </div>
 </div>
 
@@ -202,54 +197,11 @@
     }
   }
 
-  async function drawBTCLogChart() {
-    const res = await fetch('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=gbp&days=max');
-    const data = await res.json();
-
-    const labels = [];
-    const prices = [];
-
-    data.prices.forEach(([timestamp, price]) => {
-      const date = new Date(timestamp).toLocaleDateString();
-      labels.push(date);
-      prices.push(price);
-    });
-
-    new Chart(document.getElementById('btcLogChart'), {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'BTC Price (GBP)',
-          data: prices,
-          borderColor: '#2c3e50',
-          backgroundColor: 'rgba(44,62,80,0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            type: 'logarithmic',
-            beginAtZero: false,
-            ticks: {
-              callback: function(value) {
-                return '£' + value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
   // Initial load
   document.addEventListener('DOMContentLoaded', () => {
     const preferred = localStorage.getItem('preferredChartDays') || '30';
     updateChart(preferred);
     updateLiveStats();
-    drawBTCLogChart();
 
     document.querySelectorAll('#range-buttons button').forEach(btn => {
       btn.addEventListener('click', () => {
