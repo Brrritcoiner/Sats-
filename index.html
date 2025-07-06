@@ -2,192 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sats to the £</title>
+  <title>Bitcoin Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      color: #2c3e50;
-    }
-
-    header {
-      background-color: #F7931A;
-      color: white;
-      padding: 15px;
-      font-size: 1.2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .main-display {
-      text-align: center;
-      padding: 40px 20px 10px;
-    }
-
-    .main-display h1 {
-      font-size: 5rem;
+      background: #F7931A;
       margin: 0;
-      color: #F7931A;
-    }
-
-    .main-display p {
-      font-size: 1.4rem;
-      color: #555;
-      margin-top: 5px;
-    }
-
-    .chart-section {
-      display: flex;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .chart-container {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-      max-width: 800px;
-      width: 100%;
-    }
-
-    .download-btn {
-      margin-top: 20px;
-      text-align: right;
-    }
-
-    .download-btn button {
-      background-color: #F7931A;
+      padding: 0;
       color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 4px;
+    }
+    a { color: white; text-decoration: underline; }
+    header {
+      background: #F7931A;
+      color: white;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      flex-wrap: wrap;
       font-weight: bold;
-      cursor: pointer;
     }
-
-    .download-btn button:hover {
-      background-color: #e67e00;
+    .section {
+      padding: 30px;
+      max-width: 1000px;
+      margin: auto;
     }
-
-    .news-section {
-      margin: 20px;
+    h1, h2, h3 { color: white; }
+    .divider {
+      margin: 40px 0;
+      border-top: 1px solid white;
     }
-
-    iframe {
-      border: none;
+    .btc-breakdown table {
       width: 100%;
-      height: 600px;
+      background: transparent;
+      border-collapse: collapse;
+      margin-top: 20px;
+      color: white;
     }
-
-    @media (max-width: 768px) {
-      .main-display h1 {
-        font-size: 3rem;
-      }
-    }
-  </style>
-</head>
-<body>
-
-<header>
-  <div id="btcPrice">BTC/GBP: £...</div>
-  <div id="satsValue">Sats = ...</div>
-</header>
-
-<div class="main-display">
-  <h1 id="mainSats">...</h1>
-  <p>Sats to the £</p>
-</div>
-
-<div class="chart-section">
-  <div class="chart-container">
-    <h3 style="margin-bottom: 10px;">Sats per £ (Monthly)</h3>
-    <canvas id="satsChart"></canvas>
-    <div class="download-btn">
-      <a href="btc_gbp_monthly_history.csv" download="sats_per_gbp_history.csv">
-        <button>⬇ Download CSV</button>
-      </a>
-    </div>
-  </div>
-</div>
-
-<div class="news-section">
-  <h3 style="text-align:center;">Bitcoin News Feed</h3>
-  <iframe src="https://cryptopanic.com/widgets/news/?bg_color=ffffff&font_family=sans&font_size=14&header_bg_color=f7931a&header_text_color=ffffff&link_color=000000&posts_limit=10"></iframe>
-</div>
-
-<script>
-  async function updateLiveStats() {
-    try {
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp');
-      const data = await res.json();
-      const price = data.bitcoin.gbp;
-      const sats = Math.floor(100000000 / price);
-
-      document.getElementById('btcPrice').textContent = `BTC/GBP: £${price.toLocaleString()}`;
-      document.getElementById('satsValue').textContent = `Sats = ${sats.toLocaleString()}`;
-      document.getElementById('mainSats').textContent = sats.toLocaleString();
-    } catch (err) {
-      console.error('Price fetch error:', err);
-    }
-  }
-
-  async function loadCSVChart() {
-    const res = await fetch('btc_gbp_monthly_history.csv');
-    const csv = await res.text();
-
-    const rows = csv.trim().split('\n').slice(1);
-    const labels = [];
-    const data = [];
-
-    rows.forEach(row => {
-      const [date, price, sats] = row.split('\t'); // Fixed: tab-separated
-      labels.push(date);
-      data.push(parseInt(sats.trim())); // Trim for good measure
-    });
-
-    const ctx = document.getElementById('satsChart').getContext('2d');
-    if (window.satsChart) window.satsChart.destroy();
-
-    window.satsChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          label: 'Sats per £',
-          data,
-          borderColor: '#F7931A',
-          backgroundColor: 'rgba(247,147,26,0.1)',
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: false,
-            ticks: {
-              callback: value => value.toLocaleString()
-            }
-          }
-        }
-      }
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    updateLiveStats();
-    loadCSVChart();
-  });
-
-  setInterval(updateLiveStats, 60000);
-</script>
-
-</body>
-</html>
+    .btc-breakdown th, .btc-breakdown td {
+      padding: 10px;
+      border: 1px solid white;
+      text-align: center;
