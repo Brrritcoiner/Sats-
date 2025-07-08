@@ -5,6 +5,7 @@
   <title>Robot Honey Badger BTC Tracker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       background-color: #f7931a;
@@ -13,7 +14,6 @@
       margin: 0;
       padding: 0;
     }
-
     .ticker-wrapper {
       background: white;
       color: #f7931a;
@@ -24,28 +24,23 @@
       padding: 10px 0;
       position: relative;
     }
-
     .ticker-text {
       display: inline-block;
       padding-left: 100%;
       animation: ticker-scroll 20s linear infinite;
     }
-
     @keyframes ticker-scroll {
       0% { transform: translateX(0%); }
       100% { transform: translateX(-100%); }
     }
-
     header, section, footer {
       padding: 20px;
       text-align: center;
     }
-
     img.logo {
       width: 80px;
       margin-bottom: 10px;
     }
-
     .sats-box {
       background-color: white;
       color: #f7931a;
@@ -57,11 +52,9 @@
       border-radius: 12px;
       transition: box-shadow 0.3s ease;
     }
-
     .sats-box:hover {
       box-shadow: 0 0 20px white;
     }
-
     .satvalue-box {
       border: 3px solid white;
       padding: 18px 35px;
@@ -72,35 +65,28 @@
       border-radius: 12px;
       transition: box-shadow 0.3s ease;
     }
-
     .satvalue-box:hover {
       box-shadow: 0 0 15px white;
     }
-
     .btc-icon {
       margin-right: 10px;
     }
-
     .chart {
       margin-top: 40px;
     }
-
     .table-section {
       overflow-x: auto;
     }
-
     table {
       margin: 0 auto;
       border-collapse: collapse;
       color: white;
       font-size: 1em;
     }
-
     table, th, td {
       border: 1px solid white;
       padding: 8px 12px;
     }
-
     a {
       color: white;
       text-decoration: underline;
@@ -109,7 +95,6 @@
 </head>
 <body>
 
-  <!-- ⛓️ Scrolling block height ticker -->
   <div class="ticker-wrapper">
     <div class="ticker-text" id="tickerText">⛓️ Loading block height…</div>
   </div>
@@ -117,20 +102,22 @@
   <header>
     <img src="BTC_logo.png" alt="Bitcoin Logo" class="logo">
     <h1>Live Bitcoin Tracker</h1>
-
     <div class="sats-box">
       <span class="btc-icon">₿</span>£1 = <span id="satsPerPound">1256</span> Satoshis
     </div>
-
     <div class="satvalue-box">
       <span class="btc-icon">₿</span>1 Satoshi = <span id="satValue">£0.00008257</span>
     </div>
   </header>
+  <section class="chart">
+    <h2>Sats per £1 Over Time</h2>
+    <canvas id="satsChart" style="max-width: 90%; height: 400px;"></canvas>
+    <p><em>Data Source: <code>btc_gbp_monthly_history.csv</code></em></p>
+  </section>
 
   <section class="chart">
-    <h2>BTC All-Time Price Chart</h2>
-    <img src="chart.svg" alt="BTC All-Time Chart" style="max-width: 90%; height: auto;">
-    <p><em>Data Source: <code>btc-gbp-monthly-history.csv</code></em></p>
+    <h2>BTC Price in GBP (Log Scale)</h2>
+    <canvas id="btcLogChart" style="max-width: 90%; height: 400px;"></canvas>
   </section>
 
   <section class="table-section">
@@ -171,7 +158,6 @@
   <footer>
     <p>⚡ Robot Honey Badger 2099 — Running on Sats ⚡</p>
   </footer>
-
   <script>
     async function updatePrices() {
       try {
@@ -186,8 +172,7 @@
         document.getElementById('satValue').innerText = `£${satValue}`;
         document.getElementById('satoshiValue').innerText = `£${satValue}`;
 
-        const priceCells = document.querySelectorAll('.live-price');
-        priceCells.forEach(cell => {
+        document.querySelectorAll('.live-price').forEach(cell => {
           const multiplier = parseFloat(cell.dataset.multiplier);
           const value = (priceGBP * multiplier).toFixed(2);
           cell.innerText = `£${value}`;
@@ -200,20 +185,137 @@
     async function updateBlockHeight() {
       try {
         const res = await fetch('https://blockstream.info/api/blocks/tip/height');
-        const blockHeight = await res.text();
-        const text = `⛓️ Current Bitcoin Block Height: ${blockHeight} | Stay humble, stack sats. 🚀`;
-        document.getElementById('tickerText').innerText = text;
+        const height = await res.text();
+        document.getElementById('tickerText').innerText =
+          `⛓️ Block Height: ${height} | Stay humble, stack sats 🚀`;
       } catch (e) {
         document.getElementById('tickerText').innerText = '⛓️ Failed to fetch block height.';
-        console.error('Block height fetch error:', e);
+        console.error('Block height error:', e);
+      }
+    }
+
+    async function loadCSVChart() {
+      try {
+        const response = await fetch('btc_gbp_monthly_history.csv');
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(',');
+        const dateIndex = headers.indexOf('date');
+        const satsIndex = headers.indexOf('sats_per_gbp');
+
+        const labels = [];
+        const dataPoints = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',');
+          labels.push(row[dateIndex]);
+          dataPoints.push(parseInt(row[satsIndex]));
+        }
+
+        const ctx = document.getElementById('satsChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Satoshis per £1',
+              data: dataPoints,
+              borderColor: 'white',
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              tension: 0.2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              },
+              y: {
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: 'white' } }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('CSV chart error:', err);
+      }
+    }
+
+    async function loadLogPriceChart() {
+      try {
+        const response = await fetch('btc_gbp_monthly_history.csv');
+        const text = await response.text();
+        const lines = text.trim().split('\n');
+        const headers = lines[0].split(',');
+        const dateIndex = headers.indexOf('date');
+        const priceIndex = headers.indexOf('price_gbp');
+
+        const labels = [];
+        const dataPoints = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const row = lines[i].split(',');
+          labels.push(row[dateIndex]);
+          dataPoints.push(parseFloat(row[priceIndex]));
+        }
+
+        const ctx = document.getElementById('btcLogChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: 'BTC Price (GBP)',
+              data: dataPoints,
+              borderColor: 'white',
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              tension: 0.2
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                ticks: { color: 'white' },
+                grid: { color: 'rgba(255,255,255,0.1)' }
+              },
+              y: {
+                type: 'logarithmic',
+                ticks: {
+                  color: 'white',
+                  callback: value => `£${value}`
+                },
+                grid: { color: 'rgba(255,255,255,0.1)' },
+                title: {
+                  display: true,
+                  text: 'BTC Price (GBP, Log Scale)',
+                  color: 'white'
+                }
+              }
+            },
+            plugins: {
+              legend: { labels: { color: 'white' } },
+              tooltip: { mode: 'index', intersect: false }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Log chart error:', err);
       }
     }
 
     updatePrices();
     updateBlockHeight();
+    loadCSVChart();
+    loadLogPriceChart();
     setInterval(updatePrices, 60000);
     setInterval(updateBlockHeight, 60000);
   </script>
-
 </body>
 </html>
