@@ -200,10 +200,10 @@
 
     async function updateHashrate() {
       try {
-        const res = await fetch('https://api.blockchain.info/charts/hash-rate?timespan=1days&format=json');
+        const res = await fetch('https://api.coinlore.net/api/ticker/?id=90');
         const data = await res.json();
-        const latest = data.values[data.values.length - 1].y;
-        const hashrateEH = (latest / 1e6).toFixed(1); // Convert GH/s to EH/s
+        const hashrateTH = parseFloat(data[0].hs); // TH/s
+        const hashrateEH = (hashrateTH / 1e6).toFixed(1); // Convert to EH/s
         hashrateText = `🔧 Hashrate: ${hashrateEH} EH/s`;
         updateTicker();
       } catch (e) {
