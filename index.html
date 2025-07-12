@@ -41,32 +41,25 @@
       width: 80px;
       margin-bottom: 10px;
     }
-    .sats-box {
+    .header-boxes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .sats-box, .satvalue-box {
       background-color: white;
       color: #f7931a;
       display: inline-block;
       padding: 25px 40px;
       margin: 15px 0;
-      font-size: 3em;
+      font-size: 2.2em;
       font-weight: 900;
       border-radius: 12px;
       transition: box-shadow 0.3s ease;
     }
-    .sats-box:hover {
+    .sats-box:hover, .satvalue-box:hover {
       box-shadow: 0 0 20px white;
-    }
-    .satvalue-box {
-      border: 3px solid white;
-      padding: 18px 35px;
-      display: inline-block;
-      margin: 15px 0;
-      font-size: 2em;
-      font-weight: 700;
-      border-radius: 12px;
-      transition: box-shadow 0.3s ease;
-    }
-    .satvalue-box:hover {
-      box-shadow: 0 0 15px white;
     }
     .table-section {
       overflow-x: auto;
@@ -106,11 +99,13 @@
   <header>
     <img src="BTC_logo.png" alt="Bitcoin Logo" class="logo">
     <h1>Live Bitcoin Satoshi Tracker</h1>
-    <div class="sats-box">
-      <span>£1 = <span id="satsPerPound">...</span> Satoshis</span>
-    </div>
-    <div class="satvalue-box">
-      <span>1 Satoshi = <span id="satValue">...</span></span>
+    <div class="header-boxes">
+      <div class="sats-box">
+        <span>£1 = <span id="satsPerPound">...</span> Satoshis</span>
+      </div>
+      <div class="satvalue-box">
+        <span>1 Satoshi = <span id="satValue">...</span></span>
+      </div>
     </div>
   </header>
 
