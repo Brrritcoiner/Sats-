@@ -150,6 +150,12 @@
   </footer>
 
   <script>
+    let blockHeightText = '';
+
+    function updateTicker(priceText = '') {
+      document.getElementById('tickerText').innerText = `${priceText} | ${blockHeightText} | Stay humble, stack sats 🚀`;
+    }
+
     async function updatePrices() {
       try {
         const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp');
@@ -159,7 +165,6 @@
         const satsPerPound = Math.floor(100000000 / priceGBP);
         document.getElementById('satsPerPound').innerText = satsPerPound.toLocaleString();
 
-        // ✅ Corrected formula: 1 Satoshi = BTC price ÷ 100,000,000
         const satValue = (priceGBP / 100000000).toFixed(8);
         document.getElementById('satValue').innerText = `£${satValue}`;
         document.getElementById('satoshiValue').innerText = `£${satValue}`;
@@ -169,6 +174,9 @@
           const value = (priceGBP * multiplier).toFixed(2);
           cell.innerText = `£${value}`;
         });
+
+        const priceText = `₿ 1 BTC = £${priceGBP.toLocaleString()}`;
+        updateTicker(priceText);
       } catch (e) {
         console.error('Price fetch error:', e);
       }
@@ -178,10 +186,11 @@
       try {
         const res = await fetch('https://blockstream.info/api/blocks/tip/height');
         const height = await res.text();
-        document.getElementById('tickerText').innerText =
-          `⛓️ Block Height: ${height} | Stay humble, stack sats 🚀`;
+        blockHeightText = `⛓️ Block Height: ${height}`;
+        updateTicker();
       } catch (e) {
-        document.getElementById('tickerText').innerText = '⛓️ Failed to fetch block height but can confirm Craig Wright is not Satoshi Nakamoto.';
+        blockHeightText = '⛓️ Failed to fetch block height but can confirm Craig Wright is not Satoshi Nakamoto.';
+        updateTicker();
         console.error('Block height error:', e);
       }
     }
