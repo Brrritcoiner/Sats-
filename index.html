@@ -151,9 +151,12 @@
 
   <script>
     let blockHeightText = '';
+    let hashrateText = '';
+    let priceText = '';
 
-    function updateTicker(priceText = '') {
-      document.getElementById('tickerText').innerText = `${priceText} | ${blockHeightText} | Stay humble, stack sats 🚀`;
+    function updateTicker() {
+      document.getElementById('tickerText').innerText =
+        `${priceText} | ${blockHeightText} | ${hashrateText} | Stay humble, stack sats 🚀`;
     }
 
     async function updatePrices() {
@@ -175,8 +178,8 @@
           cell.innerText = `£${value}`;
         });
 
-        const priceText = `₿ 1 BTC = £${priceGBP.toLocaleString()}`;
-        updateTicker(priceText);
+        priceText = `₿ 1 BTC = £${priceGBP.toLocaleString()}`;
+        updateTicker();
       } catch (e) {
         console.error('Price fetch error:', e);
       }
@@ -189,9 +192,24 @@
         blockHeightText = `⛓️ Block Height: ${height}`;
         updateTicker();
       } catch (e) {
-        blockHeightText = '⛓️ Failed to fetch block height but can confirm Craig Wright is not Satoshi Nakamoto.';
+        blockHeightText = '⛓️ Block height unavailable';
         updateTicker();
         console.error('Block height error:', e);
+      }
+    }
+
+    async function updateHashrate() {
+      try {
+        const res = await fetch('https://api.blockchain.info/charts/hash-rate?timespan=1days&format=json');
+        const data = await res.json();
+        const latest = data.values[data.values.length - 1].y;
+        const hashrateEH = (latest / 1e6).toFixed(1); // Convert GH/s to EH/s
+        hashrateText = `🔧 Hashrate: ${hashrateEH} EH/s`;
+        updateTicker();
+      } catch (e) {
+        hashrateText = '🔧 Hashrate unavailable';
+        updateTicker();
+        console.error('Hashrate fetch error:', e);
       }
     }
 
@@ -268,8 +286,10 @@
 
     updatePrices();
     updateBlockHeight();
+    updateHashrate();
     setInterval(updatePrices, 60000);
     setInterval(updateBlockHeight, 60000);
+    setInterval(updateHashrate, 60000);
   </script>
 
 </body>
