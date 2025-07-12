@@ -68,12 +68,6 @@
     .satvalue-box:hover {
       box-shadow: 0 0 15px white;
     }
-    .btc-icon {
-      margin-right: 10px;
-    }
-    .chart {
-      margin-top: 40px;
-    }
     .table-section {
       overflow-x: auto;
     }
@@ -87,20 +81,11 @@
       border: 1px solid white;
       padding: 8px 12px;
     }
-    a {
-      color: white;
-      text-decoration: underline;
-    }
-    .chart-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 40px;
-    }
-    .chart-card {
-      flex: 1 1 45%;
-      max-width: 500px;
+    .live-price {
+      font-weight: bold;
+      color: #ffffff;
+      background-color: #f7931a33;
+      border-radius: 4px;
     }
     canvas {
       width: 100% !important;
@@ -113,6 +98,7 @@
   </style>
 </head>
 <body>
+
   <div class="ticker-wrapper">
     <div class="ticker-text" id="tickerText">⛓️ Loading block height…</div>
   </div>
@@ -121,10 +107,10 @@
     <img src="BTC_logo.png" alt="Bitcoin Logo" class="logo">
     <h1>Live Bitcoin Satoshi Tracker</h1>
     <div class="sats-box">
-      <span>£1 = <span id="satsPerPound">1256</span> Sats</span>
+      <span>£1 = <span id="satsPerPound">...</span> Sats</span>
     </div>
     <div class="satvalue-box">
-      <span>1 Satoshi = <span id="satValue">£0.00008257</span></span>
+      <span>1 Satoshi = <span id="satValue">...</span></span>
     </div>
   </header>
 
@@ -139,16 +125,16 @@
         </tr>
       </thead>
       <tbody>
-        <tr><td>1 BTC</td><td>100,000,000</td><td class="live-price" data-multiplier="1">£X</td></tr>
-        <tr><td>0.5</td><td>50,000,000</td><td class="live-price" data-multiplier="0.5">£Y</td></tr>
-        <tr><td>0.25</td><td>25,000,000</td><td class="live-price" data-multiplier="0.25">£Z</td></tr>
-        <tr><td>0.1</td><td>10,000,000</td><td class="live-price" data-multiplier="0.1">£A</td></tr>
-        <tr><td>0.01</td><td>1,000,000</td><td class="live-price" data-multiplier="0.01">£B</td></tr>
-        <tr><td>0.001</td><td>100,000</td><td class="live-price" data-multiplier="0.001">£C</td></tr>
-        <tr><td>0.0001</td><td>10,000</td><td class="live-price" data-multiplier="0.0001">£D</td></tr>
-        <tr><td>0.00001</td><td>1,000</td><td class="live-price" data-multiplier="0.00001">£E</td></tr>
-        <tr><td>0.000001</td><td>100</td><td class="live-price" data-multiplier="0.000001">£F</td></tr>
-        <tr><td>0.0000001</td><td>1</td><td id="satoshiValue">£0.00008257</td></tr>
+        <tr><td>1 BTC</td><td>100,000,000</td><td class="live-price" data-multiplier="1"></td></tr>
+        <tr><td>0.5</td><td>50,000,000</td><td class="live-price" data-multiplier="0.5"></td></tr>
+        <tr><td>0.25</td><td>25,000,000</td><td class="live-price" data-multiplier="0.25"></td></tr>
+        <tr><td>0.1</td><td>10,000,000</td><td class="live-price" data-multiplier="0.1"></td></tr>
+        <tr><td>0.01</td><td>1,000,000</td><td class="live-price" data-multiplier="0.01"></td></tr>
+        <tr><td>0.001</td><td>100,000</td><td class="live-price" data-multiplier="0.001"></td></tr>
+        <tr><td>0.0001</td><td>10,000</td><td class="live-price" data-multiplier="0.0001"></td></tr>
+        <tr><td>0.00001</td><td>1,000</td><td class="live-price" data-multiplier="0.00001"></td></tr>
+        <tr><td>0.000001</td><td>100</td><td class="live-price" data-multiplier="0.000001"></td></tr>
+        <tr><td>0.0000001</td><td>1</td><td id="satoshiValue"></td></tr>
       </tbody>
     </table>
   </section>
@@ -156,81 +142,6 @@
   <section class="chart">
     <h2>Sats per £1 (Yearly Averages)</h2>
     <canvas id="satsChart" height="400"></canvas>
-    <script>
-      const ctx = document.getElementById('satsChart').getContext('2d');
-      const satsChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'],
-          datasets: [{
-            label: 'Sats per £1',
-            data: [403777, 253762, 64162, 19218, 20336, 10223, 3356, 3375, 4181, 5091],
-            borderColor: '#f7931a',
-            backgroundColor: 'rgba(247, 147, 26, 0.2)',
-            borderWidth: 3,
-            tension: 0.3,
-            pointBackgroundColor: '#ffffff',
-            pointRadius: 5,
-            pointHoverRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: {
-              labels: {
-                color: '#f7931a',
-                font: {
-                  family: 'Orbitron',
-                  size: 14
-                }
-              }
-            },
-            tooltip: {
-              backgroundColor: '#0b0f1a',
-              titleColor: '#f7931a',
-              bodyColor: '#ffffff',
-              borderColor: '#f7931a',
-              borderWidth: 1
-            }
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: '#ffffff',
-                font: {
-                  family: 'Orbitron'
-                }
-              },
-              grid: {
-                color: '#444',
-                lineWidth: 0.5
-              }
-            },
-            y: {
-              ticks: {
-                color: '#ffffff',
-                font: {
-                  family: 'Orbitron'
-                },
-                callback: function(value) {
-                  return value.toLocaleString();
-                }
-              },
-              grid: {
-                color: '#333',
-                lineWidth: 0.3
-              },
-              suggestedMin: 1000,
-              suggestedMax: 512000,
-              afterBuildTicks: function(axis) {
-                axis.ticks = [1000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000].map(v => ({value: v}));
-              }
-            }
-          }
-        }
-      });
-    </script>
   </section>
 
   <section class="chart">
@@ -241,5 +152,118 @@
   <footer>
     <p>⚡ Robot Honey Badger 2099 — Running on Sats ⚡</p>
   </footer>
+
+  <script>
+    async function updatePrices() {
+      try {
+        const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=gbp');
+        const data = await res.json();
+        const priceGBP = data.bitcoin.gbp;
+
+        const satsPerPound = Math.floor(100000000 / priceGBP);
+        document.getElementById('satsPerPound').innerText = satsPerPound.toLocaleString();
+
+        const satValue = (1 / priceGBP).toFixed(8);
+        document.getElementById('satValue').innerText = `£${satValue}`;
+        document.getElementById('satoshiValue').innerText = `£${satValue}`;
+
+        document.querySelectorAll('.live-price').forEach(cell => {
+          const multiplier = parseFloat(cell.dataset.multiplier);
+          const value = (priceGBP * multiplier).toFixed(2);
+          cell.innerText = `£${value}`;
+        });
+      } catch (e) {
+        console.error('Price fetch error:', e);
+      }
+    }
+
+    async function updateBlockHeight() {
+      try {
+        const res = await fetch('https://blockstream.info/api/blocks/tip/height');
+        const height = await res.text();
+        document.getElementById('tickerText').innerText =
+          `⛓️ Block Height: ${height} | Stay humble, stack sats 🚀`;
+      } catch (e) {
+        document.getElementById('tickerText').innerText = '⛓️ Failed to fetch block height.';
+        console.error('Block height error:', e);
+      }
+    }
+
+    const ctx = document.getElementById('satsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'],
+        datasets: [{
+          label: 'Sats per £1',
+          data: [403777, 253762, 64162, 19218, 20336, 10223, 3356, 3375, 4181, 5091],
+          borderColor: '#f7931a',
+          backgroundColor: 'rgba(247, 147, 26, 0.2)',
+          borderWidth: 3,
+          tension: 0.3,
+          pointBackgroundColor: '#ffffff',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#f7931a',
+              font: {
+                family: 'Orbitron',
+                size: 14
+              }
+            }
+          },
+          tooltip: {
+            backgroundColor: '#0b0f1a',
+            titleColor: '#f7931a',
+            bodyColor: '#ffffff',
+            borderColor: '#f7931a',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#ffffff',
+              font: { family: 'Orbitron' }
+            },
+            grid: {
+              color: '#444',
+              lineWidth: 0.5
+            }
+          },
+          y: {
+            ticks: {
+              color: '#ffffff',
+              font: { family: 'Orbitron' },
+              callback: function(value) {
+                return value.toLocaleString();
+              }
+            },
+            grid: {
+              color: '#333',
+              lineWidth: 0.3
+            },
+            suggestedMin: 1000,
+            suggestedMax: 512000,
+            afterBuildTicks: function(axis) {
+              axis.ticks = [1000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000].map(v => ({value: v}));
+            }
+          }
+        }
+      }
+    });
+
+    updatePrices();
+    updateBlockHeight();
+    setInterval(updatePrices, 60000);
+    setInterval(updateBlockHeight, 60000);
+  </script>
+
 </body>
 </html>
