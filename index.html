@@ -225,8 +225,8 @@
       }
     }
 
-    const ctx = document.getElementById('satsChart').getContext('2d');
-    new Chart(ctx, {
+    const satsChart = document.getElementById('satsChart').getContext('2d');
+    new Chart(satsChart, {
       type: 'line',
       data: {
         labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'],
@@ -248,10 +248,7 @@
           legend: {
             labels: {
               color: '#f7931a',
-              font: {
-                family: 'Orbitron',
-                size: 14
-              }
+              font: { family: 'Orbitron', size: 14 }
             }
           },
           tooltip: {
@@ -264,33 +261,68 @@
         },
         scales: {
           x: {
+            ticks: { color: '#333', font: { family: 'Orbitron' } },
+            grid: { color: '#ccc', lineWidth: 0.5 }
+          },
+          y: {
             ticks: {
               color: '#333',
-              font: { family: 'Orbitron' }
+              font: { family: 'Orbitron' },
+              callback: value => value.toLocaleString()
             },
-            grid: {
-              color: '#ccc',
-              lineWidth: 0.5
+            grid: { color: '#eee', lineWidth: 0.3 }
+          }
+        }
+      }
+    });
+
+    const btcLogChart = document.getElementById('btcLogChart').getContext('2d');
+    new Chart(btcLogChart, {
+      type: 'line',
+      data: {
+        labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025'],
+        datasets: [{
+          label: 'BTC Price (£)',
+          data: [284.65, 624.68, 2875.34, 7780.44, 10085.63, 11323.47, 41626.2, 23336.9, 29230.11, 64619.25, 117516.99],
+          borderColor: '#f7931a',
+          backgroundColor: 'rgba(247, 147, 26, 0.2)',
+          borderWidth: 3,
+          tension: 0.3,
+          pointBackgroundColor: '#f7931a',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#f7931a',
+              font: { family: 'Orbitron', size: 14 }
             }
+          },
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#f7931a',
+            bodyColor: '#333',
+            borderColor: '#f7931a',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#333', font: { family: 'Orbitron' } },
+            grid: { color: '#ccc', lineWidth: 0.5 }
           },
           y: {
             type: 'logarithmic',
             ticks: {
               color: '#333',
               font: { family: 'Orbitron' },
-              callback: function(value) {
-                return value.toLocaleString();
-              }
+              callback: value => `£${value.toLocaleString()}`
             },
-            grid: {
-              color: '#eee',
-              lineWidth: 0.3
-            },
-            min: 1000,
-            max: 512000,
-            afterBuildTicks: function(axis) {
-              axis.ticks = [1000, 2000, 3000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000].map(v => ({ value: v }));
-            }
+            grid: { color: '#eee', lineWidth: 0.3 }
           }
         }
       }
