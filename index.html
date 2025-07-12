@@ -27,10 +27,10 @@
     .ticker-text {
       display: inline-block;
       padding-left: 100%;
-      animation: ticker 20s linear infinite;
+      animation: ticker-scroll 20s linear infinite;
     }
-    @keyframes ticker {
-      0% { transform: translateX(0); }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0%); }
       100% { transform: translateX(-100%); }
     }
     header, section, footer {
@@ -41,13 +41,19 @@
       width: 80px;
       margin-bottom: 10px;
     }
+    .header-boxes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
     .sats-box, .satvalue-box {
       background-color: white;
       color: #f7931a;
       display: inline-block;
       padding: 25px 40px;
-      margin: 10px 0;
-      font-size: 2.5em;
+      margin: 15px 0;
+      font-size: 2.2em;
       font-weight: 900;
       border-radius: 12px;
       transition: box-shadow 0.3s ease;
@@ -75,18 +81,18 @@
       border-radius: 4px;
     }
     canvas {
+      width: 100% !important;
+      height: 300px !important;
       background: white;
       border: 4px solid #f7931a;
       border-radius: 16px;
       box-shadow: 0 0 20px #f7931aaa;
       padding: 10px;
-      margin-bottom: 30px;
-      width: 100% !important;
-      height: 300px !important;
     }
   </style>
 </head>
 <body>
+
   <div class="ticker-wrapper">
     <div class="ticker-text" id="tickerText">⛓️ Loading block height…</div>
   </div>
@@ -94,11 +100,13 @@
   <header>
     <img src="BTC_logo.png" alt="Bitcoin Logo" class="logo">
     <h1>Live Bitcoin Satoshi Tracker</h1>
-    <div class="sats-box">
-      £1 = <span id="satsPerPound">...</span> Satoshis
-    </div>
-    <div class="satvalue-box">
-      1 Satoshi = <span id="satValue">...</span>
+    <div class="header-boxes">
+      <div class="sats-box">
+        <span>£1 = <span id="satsPerPound">...</span> Satoshis</span>
+      </div>
+      <div class="satvalue-box">
+        <span>1 Satoshi = <span id="satValue">...</span></span>
+      </div>
     </div>
   </header>
 
@@ -106,7 +114,11 @@
     <h2>BTC Denominations</h2>
     <table>
       <thead>
-        <tr><th>BTC Amount</th><th># of Satoshis</th><th>Live Price</th></tr>
+        <tr>
+          <th>BTC Amount</th>
+          <th># of Satoshis</th>
+          <th>Live Price</th>
+        </tr>
       </thead>
       <tbody>
         <tr><td>1 BTC</td><td>100 million</td><td class="live-price" data-multiplier="1"></td></tr>
@@ -123,17 +135,18 @@
     </table>
   </section>
 
-  <section>
-    <h2>Sats per £1 Over Time</h2>
-    <canvas id="satsChart"></canvas>
+  <section class="chart">
+    <h2>Sats per £1 (Yearly Averages)</h2>
+    <canvas id="satsChart" height="400"></canvas>
   </section>
-  <section>
-    <h2>All-Time BTC/GBP (Log Scale)</h2>
-    <canvas id="btcLogChart"></canvas>
+
+  <section class="chart">
+    <h2>BTC Price in GBP (Log Scale)</h2>
+    <canvas id="btcLogChart" height="400"></canvas>
   </section>
 
   <footer>
-    <p>⚡ Robot Honey Badger 2140 — Running on Sats ⚡</p>
+    <p>⚡ Robot Honey Badger 2099 — Running on Sats ⚡</p>
   </footer>
 
   <script>
@@ -164,62 +177,90 @@
       try {
         const res = await fetch('https://blockstream.info/api/blocks/tip/height');
         const height = await res.text();
-        document.getElementById('tickerText').innerText = `⛓️ Block Height: ${height} | Stay humble, stack sats 🚀`;
+        document.getElementById('tickerText').innerText =
+          `⛓️ Block Height: ${height} | Stay humble, stack sats 🚀`;
       } catch (e) {
         document.getElementById('tickerText').innerText = '⛓️ Failed to fetch block height.';
         console.error('Block height error:', e);
       }
     }
 
-    // Load BTC/GBP log chart
-    fetch('market-price.json')
-      .then(response => response.json())
-      .then(jsonData => {
-        const labels = jsonData.map(p => new Date(p.x).toLocaleDateString());
-        const data = jsonData.map(p => p.y);
-
-        new Chart(document.getElementById('btcLogChart'), {
-          type: 'line',
-          data: {
-            labels,
-            datasets: [{
-              label: 'BTC Price (GBP)',
-              data,
-              borderColor: '#fff',
-              backgroundColor: 'rgba(255,255,255,0.1)',
-              pointRadius: 0,
-              fill: true,
-              tension: 0.1
-            }]
+    const ctx = document.getElementById('satsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024'],
+        datasets: [{
+          label: 'Sats per £1',
+          data: [403777, 253762, 64162, 19218, 20336, 10223, 3356, 3375, 4181, 5091],
+          borderColor: '#f7931a',
+          backgroundColor: 'rgba(247, 147, 26, 0.2)',
+          borderWidth: 3,
+          tension: 0.3,
+          pointBackgroundColor: '#f7931a',
+          pointRadius: 5,
+          pointHoverRadius: 8
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            labels: {
+              color: '#f7931a',
+              font: {
+                family: 'Orbitron',
+                size: 14
+              }
+            }
           },
-          options: {
-            scales: {
-              y: {
-                type: 'logarithmic',
-                title: {
-                  display: true,
-                  text: 'Price in GBP (Log Scale)'
-                },
-                min: 1
-              },
-              x: {
-                ticks: {
-                  maxTicksLimit: 12
-                }
+          tooltip: {
+            backgroundColor: '#fff',
+            titleColor: '#f7931a',
+            bodyColor: '#333',
+            borderColor: '#f7931a',
+            borderWidth: 1
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: '#333',
+              font: { family: 'Orbitron' }
+            },
+            grid: {
+              color: '#ccc',
+              lineWidth: 0.5
+            }
+          },
+          y: {
+            type: 'logarithmic',
+            ticks: {
+              color: '#333',
+              font: { family: 'Orbitron' },
+              callback: function(value) {
+                return value.toLocaleString();
               }
             },
-            plugins: {
-              legend: { display: true }
+            grid: {
+              color: '#eee',
+              lineWidth: 0.3
+            },
+            min: 1000,
+            max: 512000,
+            afterBuildTicks: function(axis) {
+              axis.ticks = [1000, 4000, 8000, 16000, 32000, 64000, 128000, 256000, 512000].map(v => ({ value: v }));
             }
           }
-        });
-      });
+        }
+      }
+    });
 
     updatePrices();
     updateBlockHeight();
     setInterval(updatePrices, 60000);
     setInterval(updateBlockHeight, 60000);
   </script>
+
 </body>
 </html>
-
