@@ -159,7 +159,8 @@
         const satsPerPound = Math.floor(100000000 / priceGBP);
         document.getElementById('satsPerPound').innerText = satsPerPound.toLocaleString();
 
-        const satValue = (1 / priceGBP).toFixed(8);
+        // ✅ Corrected formula: 1 Satoshi = BTC price ÷ 100,000,000
+        const satValue = (priceGBP / 100000000).toFixed(8);
         document.getElementById('satValue').innerText = `£${satValue}`;
         document.getElementById('satoshiValue').innerText = `£${satValue}`;
 
