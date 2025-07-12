@@ -75,10 +75,24 @@
       padding: 8px 12px;
     }
     .live-price {
-      font-weight: bold;
-      color: #ffffff;
-      background-color: #f7931a33;
-      border-radius: 4px;
+      font-weight: 900;
+      color: #f7931a;
+      background-color: white;
+      border-radius: 8px;
+      padding: 6px 10px;
+      box-shadow: 0 0 10px white;
+      text-shadow: 0 0 3px #f7931a88;
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 10px white;
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px white;
+      }
     }
     canvas {
       width: 100% !important;
@@ -202,8 +216,8 @@
       try {
         const res = await fetch('https://api.coinlore.net/api/ticker/?id=90');
         const data = await res.json();
-        const hashrateTH = parseFloat(data[0].hs); // TH/s
-        const hashrateEH = (hashrateTH / 1e6).toFixed(1); // Convert to EH/s
+        const hashrateTH = parseFloat(data[0].hs);
+        const hashrateEH = (hashrateTH / 1e6).toFixed(1);
         hashrateText = `🔧 Hashrate: ${hashrateEH} EH/s`;
         updateTicker();
       } catch (e) {
